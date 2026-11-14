@@ -1,16 +1,16 @@
 # A1-Italian – Flashcards
 
-A single-file, offline flashcard app for the vocabulary of *Nuovo Espresso 1* (lessons 1–10), with Persian (Farsi) meanings.
+A single-file, offline flashcard app for Italian A1 vocabulary (lessons 1–10), with Persian (Farsi) meanings.
 
 ## Features
 
-- Flashcards with Italian word, Persian meaning, part of speech, gender, and an A1 example sentence (with Persian translation)
+- Flashcards with the Italian word, Persian meaning, part of speech, gender, and an A1 example sentence with Persian translation
 - Definite articles and plurals for nouns, and forms for adjectives
 - Italian text-to-speech (uses the browser's Italian voice)
-- Anki-style review: ✗ Non ricordo / ? Incerto / ✓ Lo so, with spaced repetition and a "Da ripassare" queue
-- List view with search and status filter
-- Save and load progress as a JSON file
-- Light and dark theme
+- Search and lesson filter
+- List view with all words of a lesson
+- Shuffle
+- Light and dark theme (follows your system setting)
 
 ## Usage
 
@@ -22,14 +22,11 @@ Keyboard shortcuts (Flashcard mode):
 |---|---|
 | Space | Flip card |
 | ← / → | Previous / next |
-| 1 / 2 / 3 | Non ricordo / Incerto / Lo so |
 | S | Speak the Italian word |
-
-Progress is stored in your browser. Use **Salva** to export it and **Carica** to import it on another device.
 
 ## Data
 
-The vocabulary comes from the *Nuovo Espresso 1* textbook (Alma Edizioni) and is included for personal study. The example sentences and Persian translations were written for this app.
+The vocabulary list was compiled by Homayoun Fallahi, following the lesson order of the course *Nuovo Espresso 1*. The example sentences and Persian translations were written for this app. This project is not affiliated with Alma Edizioni.
 
 ## License
 
