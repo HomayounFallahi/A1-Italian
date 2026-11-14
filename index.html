@@ -1195,6 +1195,10 @@ function buildDeck(){
   deck = allCards().filter(c => (sel === "all" || String(c.lesson) === sel) &&
     (!q || c.it.toLowerCase().includes(q) || c.fa.includes(q) || (c.ex||"").toLowerCase().includes(q)));
   idx = 0;
+  if (pendingKey){
+    const i = deck.findIndex(c => c.lesson + "|" + c.it === pendingKey);
+    if (i >= 0) idx = i;
+  }
   renderCard();
 }
 
@@ -1220,6 +1224,25 @@ function speak(text, ev){
 }
 
 /* ---------- CARD RENDERING ---------- */
+/* ---------- Resume where you left off (per-browser, localStorage) ---------- */
+let persistOn = false;
+let pendingKey = null;   // card to return to after load (extra words are merged after init)
+function loadState(){
+  try { return JSON.parse(localStorage.getItem("a1-state") || "null"); } catch(e){ return null; }
+}
+function saveState(){
+  if (!persistOn) return;
+  try {
+    const c = deck[idx];
+    localStorage.setItem("a1-state", JSON.stringify({
+      mode: mode,
+      lesson: document.getElementById("lessonSel").value,
+      q: document.getElementById("search").value,
+      key: c ? c.lesson + "|" + c.it : ""
+    }));
+  } catch(e){}
+}
+
 function badgesHTML(c){
   let h = `<span class="badge">${POS_LABEL[c.pos] || c.pos}</span>`;
   if (c.pos === "n" && c.g) h += `<span class="badge ${c.g}">${GEN_LABEL[c.g]}</span>`;
@@ -1227,6 +1250,7 @@ function badgesHTML(c){
 }
 
 function renderCard(){
+  saveState();
   const card = document.getElementById("card");
   card.classList.remove("flipped");
   if (!deck.length){
@@ -1294,6 +1318,7 @@ function renderList(){
 /* ---------- MODE / CONTROLS ---------- */
 function setMode(m){
   mode = m;
+  saveState();
   document.getElementById("cardsView").classList.toggle("hidden", m !== "cards");
   document.getElementById("listView").classList.toggle("hidden", m !== "list");
   document.getElementById("modeCards").classList.toggle("active", m === "cards");
@@ -1305,11 +1330,16 @@ function init(){
   const sel = document.getElementById("lessonSel");
   sel.innerHTML = `<option value="all">Tutte le lezioni</option>` +
     LESSONS.map(L => `<option value="${L.n}">Lezione ${L.n} (${L.words.length})</option>`).join("");
+  const SAVED = loadState();
+  if (SAVED){
+    if ([...sel.options].some(o => o.value === SAVED.lesson)) sel.value = SAVED.lesson;
+    if (typeof SAVED.q === "string") document.getElementById("search").value = SAVED.q;
+  }
 
   sel.addEventListener("change", () => { buildDeck(); if (mode === "list") renderList(); });
   document.getElementById("modeCards").onclick = () => setMode("cards");
   document.getElementById("modeList").onclick = () => setMode("list");
-  document.getElementById("search").addEventListener("input", () => { if (mode === "list") renderList(); else buildDeck(); });
+  document.getElementById("search").addEventListener("input", () => { if (mode === "list") renderList(); else buildDeck(); saveState(); });
   document.getElementById("shuffleBtn").onclick = () => {
     for (let i = deck.length - 1; i > 0; i--){
       const j = Math.floor(Math.random() * (i + 1));
@@ -1332,7 +1362,12 @@ function init(){
   });
 
   buildDeck();
+  if (SAVED && SAVED.mode === "list") setMode("list");
   updateStats();
+  // extra vocabulary is merged by later scripts (each rebuilds the deck); keep the
+  // saved card as target until they have run, then start saving again
+  if (SAVED && SAVED.key) pendingKey = SAVED.key;
+  window.addEventListener("load", () => { pendingKey = null; persistOn = true; saveState(); });
 }
 init();
 </script>
