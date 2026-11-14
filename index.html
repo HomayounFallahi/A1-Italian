@@ -177,7 +177,6 @@
         <div class="face back">
           <div class="lesson-tag" id="lessonTagB"></div>
           <div class="fa" id="faWord" dir="rtl" lang="fa"></div>
-          <div class="badges" id="badgesB"></div>
           <div class="example">
             <span id="exText"></span>
             <button class="tts" id="ttsEx" title="Ascolta esempio">🔊</button>
@@ -1243,7 +1242,6 @@ function renderCard(){
   document.getElementById("lessonTagB").textContent = "Lezione " + c.lesson;
   document.getElementById("itWord").textContent = c.it;
   document.getElementById("badgesF").innerHTML = badgesHTML(c);
-  document.getElementById("badgesB").innerHTML = badgesHTML(c);
   document.getElementById("faWord").textContent = c.fa;
   document.getElementById("exText").textContent = c.ex;
   document.getElementById("articF").innerHTML = artHTML(c.art);
