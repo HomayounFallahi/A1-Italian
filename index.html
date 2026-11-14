@@ -82,8 +82,8 @@
           padding: 28px 22px; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
   .back { transform: rotateY(180deg); }
   .lesson-tag { position: absolute; top: 16px; left: 18px; font-size: 12px; color: var(--muted); font-weight: 600; letter-spacing: .02em; text-transform: uppercase; }
-  .word { font-size: clamp(32px, 7vw, 46px); font-weight: 750; color: var(--accent); margin: 8px 0 6px; word-break: break-word; line-height: 1.1; }
-  .badges { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .word { font-size: clamp(32px, 7vw, 46px); font-weight: 750; color: var(--accent); margin: 10px 0 20px; word-break: break-word; line-height: 1.1; }
+  .badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
   .badge { font-size: 12px; padding: 3px 10px; border-radius: 99px; background: var(--bg); color: var(--ink); border: 1px solid var(--line); }
   .badge.m { background: #dfe9f5; color: #2c5d8f; border-color: transparent; }
   .badge.f { background: #f7dfe3; color: #9b2c4b; border-color: transparent; }
@@ -93,7 +93,7 @@
   .hint { position: absolute; bottom: 14px; font-size: 12px; color: var(--muted); }
   .tts { background: var(--card); border: 1px solid var(--line); border-radius: 50%; width: 40px; height: 40px; font-size: 17px; padding: 0; display: inline-flex; align-items: center; justify-content: center; flex: none; }
   .tts:hover { border-color: var(--accent); }
-  .artic { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; font-size: 16px; margin: 12px 0 16px; }
+  .artic { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; font-size: 16px; margin: 4px 0 26px; }
   .artic:empty { display: none; }
   .art-s, .art-p { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 4px 10px; }
   .art-s b, .art-p b { font-size: 10.5px; color: var(--muted); font-weight: 700; margin-inline-end: 6px; text-transform: uppercase; letter-spacing: .04em; }
@@ -158,8 +158,6 @@
     </div>
     <select id="lessonSel" aria-label="Lezione"></select>
     <div class="search"><input type="text" id="search" placeholder="Cerca parola, traduzione o esempio…" aria-label="Cerca"></div>
-  </div>
-  <div class="row-actions">
     <button id="shuffleBtn">🔀 Mescola</button>
   </div>
 </div>
