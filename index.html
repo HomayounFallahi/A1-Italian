@@ -106,8 +106,11 @@
   .nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 12px; }
   .nav button { background: transparent; border-color: transparent; color: var(--muted); padding: 8px 10px; }
   .nav button:hover { color: var(--ink); border-color: transparent; }
-  .progress { height: 6px; background: var(--line); border-radius: 99px; margin-top: 16px; overflow: hidden; }
-  .progress > div { height: 100%; background: var(--green); width: 0; border-radius: 99px; transition: width .3s; }
+  .progress { position: relative; height: 6px; background: var(--line); border-radius: 99px; margin-top: 16px; cursor: pointer; touch-action: none; user-select: none; }
+  .progress::before { content: ""; position: absolute; left: 0; right: 0; top: -12px; bottom: -12px; }  /* bigger touch target */
+  .progress > div { position: relative; height: 100%; background: var(--green); width: 0; border-radius: 99px; pointer-events: none; }
+  .progress > div::after { content: ""; position: absolute; right: -7px; top: 50%; width: 14px; height: 14px; margin-top: -7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px var(--card, #fff); }
+  .card { touch-action: pan-y; }
   .counter { text-align: center; color: var(--muted); font-size: 13px; margin-top: 8px; }
 
   /* List */
@@ -1351,7 +1354,38 @@ function init(){
   document.getElementById("ttsEx").onclick = e => speak(deck[idx].ex, e);
   document.getElementById("prevBtn").onclick = prev;
   document.getElementById("nextBtn").onclick = next;
-  document.getElementById("card").onclick = () => flip();
+  const cardEl = document.getElementById("card");
+  // swipe the card left/right to move (mobile); a swipe does not also flip the card
+  let sx = 0, sy = 0, tracking = false, swiped = false;
+  cardEl.addEventListener("pointerdown", e => {
+    if (e.target.closest("button")) return;
+    tracking = true; swiped = false; sx = e.clientX; sy = e.clientY;
+  });
+  cardEl.addEventListener("pointerup", e => {
+    if (!tracking) return; tracking = false;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5){
+      swiped = true;
+      if (dx < 0) next(); else prev();
+    }
+  });
+  cardEl.addEventListener("pointercancel", () => { tracking = false; });
+  cardEl.onclick = () => { if (swiped){ swiped = false; return; } flip(); };
+
+  // drag or tap the progress bar to jump to any card
+  const progEl = document.querySelector(".progress");
+  let seeking = false;
+  const seekAt = e => {
+    if (!deck.length) return;
+    const r = progEl.getBoundingClientRect();
+    const f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+    const i = Math.round(f * (deck.length - 1));
+    if (i !== idx){ idx = i; renderCard(); }
+  };
+  progEl.addEventListener("pointerdown", e => { seeking = true; progEl.setPointerCapture(e.pointerId); seekAt(e); });
+  progEl.addEventListener("pointermove", e => { if (seeking) seekAt(e); });
+  progEl.addEventListener("pointerup", () => { seeking = false; });
+  progEl.addEventListener("pointercancel", () => { seeking = false; });
 
   document.addEventListener("keydown", e => {
     if (mode !== "cards" || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
