@@ -111,6 +111,10 @@
   .progress > div { position: relative; height: 100%; background: var(--green); width: 0; border-radius: 99px; pointer-events: none; }
   .progress > div::after { content: ""; position: absolute; right: -7px; top: 50%; width: 14px; height: 14px; margin-top: -7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px var(--card, #fff); }
   .card { touch-action: pan-y; }
+  .marks { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  .marks button { font-size: 13px; padding: 6px 10px; }
+  .nav button, .marks button { white-space: nowrap; }
+  .marks button[hidden] { display: none; }
   .counter { text-align: center; color: var(--muted); font-size: 13px; margin-top: 8px; }
 
   /* List */
@@ -191,6 +195,10 @@
 
     <div class="nav">
       <button id="prevBtn">← Precedente</button>
+      <div class="marks">
+        <button id="markBtn" title="Salva questa parola come segnalibro">🔖 Segna</button>
+        <button id="gotoBtn" title="Vai al segnalibro" hidden></button>
+      </div>
       <button id="nextBtn">Successiva →</button>
     </div>
     <div class="progress"><div id="bar"></div></div>
@@ -1252,8 +1260,49 @@ function badgesHTML(c){
   return h;
 }
 
+/* ---------- Bookmark (explicit, survives refresh and reopen) ---------- */
+function loadBM(){
+  try { return JSON.parse(localStorage.getItem("a1-bookmark") || "null"); } catch(e){ return null; }
+}
+function saveBM(v){
+  try {
+    if (v) localStorage.setItem("a1-bookmark", JSON.stringify(v));
+    else localStorage.removeItem("a1-bookmark");
+  } catch(e){}
+}
+function curKey(){ const c = deck[idx]; return c ? c.lesson + "|" + c.it : ""; }
+function updateMarks(){
+  const b = loadBM();
+  const onMark = !!b && deck.length > 0 && b.key === curKey();
+  const mb = document.getElementById("markBtn"), gb = document.getElementById("gotoBtn");
+  mb.disabled = !deck.length;
+  mb.textContent = onMark ? "🔖 Segnato" : "🔖 Segna";
+  mb.title = onMark ? "Rimuovi segnalibro" : "Salva questa parola come segnalibro";
+  gb.hidden = !b || onMark;
+  if (b){ gb.textContent = "📍 " + b.label; gb.title = "Vai al segnalibro: " + b.label; }
+}
+function toggleMark(){
+  if (!deck.length) return;
+  const c = deck[idx];
+  if (loadBM() && loadBM().key === curKey()) saveBM(null);
+  else saveBM({ lesson: String(c.lesson), key: curKey(), label: "Lez. " + c.lesson + " · " + c.it });
+  updateMarks();
+}
+function gotoMark(){
+  const b = loadBM();
+  if (!b) return;
+  const sel = document.getElementById("lessonSel");
+  sel.value = [...sel.options].some(o => o.value === b.lesson) ? b.lesson : "all";
+  document.getElementById("search").value = "";
+  if (mode !== "cards") setMode("cards");
+  buildDeck();
+  const i = deck.findIndex(c => c.lesson + "|" + c.it === b.key);
+  if (i >= 0){ idx = i; renderCard(); }
+}
+
 function renderCard(){
   saveState();
+  updateMarks();
   const card = document.getElementById("card");
   card.classList.remove("flipped");
   if (!deck.length){
@@ -1354,6 +1403,8 @@ function init(){
   document.getElementById("ttsEx").onclick = e => speak(deck[idx].ex, e);
   document.getElementById("prevBtn").onclick = prev;
   document.getElementById("nextBtn").onclick = next;
+  document.getElementById("markBtn").onclick = toggleMark;
+  document.getElementById("gotoBtn").onclick = gotoMark;
   const cardEl = document.getElementById("card");
   // swipe the card left/right to move (mobile); a swipe does not also flip the card
   let sx = 0, sy = 0, tracking = false, swiped = false;
